@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const Usuario = require('../models/usuario');
 
+const bcrypt = require('bcrypt');
+
 app.get('/usuario', function (req, res) {
     res.json ('get Usuario')
   });
@@ -13,7 +15,7 @@ app.post('/usuario', function (req, res) {
     let usuario = new Usuario({
         nombre: body.nombre,
         email: body.email,
-        password: body.password,
+        password: bcrypt.hashSync(body.password, 10),
         role: body.role
     });
 
@@ -25,25 +27,13 @@ app.post('/usuario', function (req, res) {
             })
         };
 
+        // usuarioDB.password = null;
+
         res.json({
             ok: true,
             usuario: usuarioDB
         })
     });
-
-    // if(body.nombre === undefined){
-
-    //     res.status(400).json({
-    //     ok: false,
-    //     mensaje: 'El nombre es necesario'
-    //     });
-    // } else {
-
-    //     res.json ({
-    //     persona: body
-    //     })
-
-    // }
 
 
 });
@@ -51,10 +41,24 @@ app.post('/usuario', function (req, res) {
 app.put('/usuario/:id', function (req, res) {
   
     let id = req.params.id;
+    let body = req.body;
 
-    res.json ({
-        id
+    Usuario.findByIdAndUpdate(id, body,  (err,usuarioDB) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        res.json ({
+            ok: true,
+            usuario: usuarioDB
+        })
+
     })
+
 });
 
 app.delete('/usuario', function (req, res) {
