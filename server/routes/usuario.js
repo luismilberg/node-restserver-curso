@@ -4,6 +4,7 @@ const Usuario = require('../models/usuario');
 
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
+const usuario = require('../models/usuario');
 
 app.get('/usuario', function (req, res) {
     res.json ('get Usuario')
@@ -44,10 +45,11 @@ app.put('/usuario/:id', function (req, res) {
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
-    
+
 
     Usuario.findByIdAndUpdate(id, body, { new:true, runValidators: true} , (err,usuarioDB) => {
-        console.log(req);
+
+
         if (err) {
             return res.status(400).json({
                 ok: false,
