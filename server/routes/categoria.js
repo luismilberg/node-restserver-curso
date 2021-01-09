@@ -5,12 +5,12 @@ let { verificaToken, verificaAdmin_Role } = require('../middlewares/autenticacio
 let app = express();
 
 let Categoria = require('../models/categoria');
+const _ = require('underscore');
 
 
 
-app.get('/categoria', [verificaToken], (req, resp) => {
+app.get('/categoria', [verificaToken], (req, res) => {
 
-    //Mostrar todas las categorías, el paginado es opcional.
 
     //Opciones de filtrado en el GET
     let desde = req.query.desde || 0; 
@@ -34,7 +34,7 @@ app.get('/categoria', [verificaToken], (req, resp) => {
         
         Categoria.count((err, conteo) => {
             
-            resp.json({
+            res.json({
                 ok: true,
                 categorias,
                 cuantos: conteo
@@ -45,14 +45,11 @@ app.get('/categoria', [verificaToken], (req, resp) => {
     
 });
 
-app.get('/categoria/:id', [verificaToken], (req, resp) => {
-
-    //Mostrar una categoría por ID
-    // Categoria.findById();
+app.get('/categoria/:id', [verificaToken], (req, res) => {
 
     let id = req.params.id;
 
-    Categoria.find({id})
+    Categoria.findById(id)
         .exec((err, categoria) => {
             if(err){
                 return res.status(400).json({
@@ -60,7 +57,7 @@ app.get('/categoria/:id', [verificaToken], (req, resp) => {
                     err
                 });
             }
-            resp.json({
+            res.json({
                 ok: true,
                 categoria
             });
@@ -68,7 +65,7 @@ app.get('/categoria/:id', [verificaToken], (req, resp) => {
     
 });
 
-app.post('/categoria', [verificaToken, verificaAdmin_Role], (req, resp) => {
+app.post('/categoria', [verificaToken, verificaAdmin_Role], (req, res) => {
 
     let body = req.body;
     let categoria = new Categoria({
@@ -84,33 +81,61 @@ app.post('/categoria', [verificaToken, verificaAdmin_Role], (req, resp) => {
             });
         }
         
-        resp.json({
+        res.json({
             ok:true,
             categoria: categoriaDB
         });
 
     });
-
-
-    //Crear nueva categoría
-    //Regresa la nueva categoría
-    //req.usuario._id -> id de la persona que está ejecutando la petición
     
 });
 
 
-app.put('/categoria/:id', (req, resp) => {
+app.put('/categoria/:id', [verificaToken, verificaAdmin_Role],(req, res) => {
 
-    //Actualiza una categoría por ID
-    
+    let id = req.params.id;
+    let descripcion = req.body.descripcion;
+
+
+    Categoria.findByIdAndUpdate(id, {descripcion}, {new: true, runValidators: true}, (err, categoriaDB) => {
+        if(err){
+            return res.status(400).json({
+                ok:false,
+                err
+            });
+        }
+
+        res.json({
+            ok: true,
+            categoria: categoriaDB
+        });
+    });  
 });
 
-app.delete('/categoria/:id', (req, resp) => {
+app.delete('/categoria/:id', [verificaToken, verificaAdmin_Role],(req, res) => {
 
-    //Solo un admin puede borrar categorías
-    //Validar token
-    //Delete físico
-    //Categoria.findByIDAndRemove()
+    let id = req.params.id;
+
+    Categoria.findByIdAndRemove(id, (err, categoriaRemovida) => {
+        if(err){
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+        if(!categoriaRemovida){
+            return res.status(400).json({
+                ok: false,
+                error: {
+                    message: 'Categoría no encontrada'
+                }
+            });
+        }
+        res.json({
+            ok:true,
+            categoria: categoriaRemovida
+        });
+    });
     
     
 });
