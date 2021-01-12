@@ -67,7 +67,7 @@ app.post('/usuario', [verificaToken, verificaAdmin_Role], function (req, res) {
 
         // usuarioDB.password = null;
 
-        res.json({
+        res.status(201).json({
             ok: true,
             usuario: usuarioDB
         })
@@ -116,7 +116,7 @@ app.delete('/usuario/:id', [verificaToken, verificaAdmin_Role], function (req, r
 
     Usuario.findByIdAndUpdate(id, cambiaEstado, { new: true}, (err, usuarioDB) => {
         if(err){
-            return res.status(400).json({
+            return res.status(500).json({
                 ok: false,
                 err
             });

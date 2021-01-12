@@ -96,7 +96,7 @@ app.post('/categoria', [verificaToken, verificaAdmin_Role], (req, res) => {
             });
         }
         
-        res.json({
+        res.status(201).json({
             ok:true,
             categoria: categoriaDB
         });
@@ -123,7 +123,7 @@ app.put('/categoria/:id', [verificaToken, verificaAdmin_Role],(req, res) => {
         if(!categoriaDB){
             return res.status(400).json({
                 ok: false,
-                err
+                message: 'Categoria no encontrado'
             });
         }
 
